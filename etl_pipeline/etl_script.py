@@ -5,12 +5,22 @@ import sqlite3
 def extract_data(file_path, region):
     """Read CSV data and add a region column."""
     data = pd.read_csv(file_path)
+    data.columns = [col.strip() for col in data.columns]  # Remove leading spaces
+    print(f"Column names for {file_path}: {data.columns}")
     data['region'] = region
     return data
 
 # Step 2: Transform Data
 def transform_data(data):
     """Apply business rules to clean and transform the data."""
+    required_columns = ['OrderId', 'OrderItemId', 'QuantityOrdered', 'ItemPrice', 'PromotionDiscount']
+    
+    # Check if all required columns exist
+    if not all(col in data.columns for col in required_columns):
+        missing_columns = [col for col in required_columns if col not in data.columns]
+        print(f"Error: Missing columns - {missing_columns}")
+        return None  # or handle it as per your requirement
+    
     # Calculate total_sales
     data['total_sales'] = data['QuantityOrdered'] * data['ItemPrice']
     
@@ -84,8 +94,11 @@ if __name__ == "__main__":
     # Transform Data
     transformed_data = transform_data(combined_data)
     
-    # Load Data into SQLite Database
-    load_data(transformed_data)
-    
-    # Validate Data with SQL Queries
-    validate_data()
+    if transformed_data is not None:
+        # Load Data into SQLite Database
+        load_data(transformed_data)
+        
+        # Validate Data with SQL Queries
+        validate_data()
+    else:
+        print("Transformation failed due to missing columns.")

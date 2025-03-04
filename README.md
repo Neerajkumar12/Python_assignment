@@ -8,11 +8,13 @@ This project consists of two parts:
 ---
 
 ## File Structure
+
+---
 project/
 │
 ├── etl_pipeline/
-│ ├── etl_script.py # Python script for ETL process (Question 1)
-│ ├── sales_data.db # SQLite database for transformed sales data
+│ ├── etl_script.py # Python script for ETL process 
+│ ├── sales_data.db # SQLite database for 
 │ ├── data/
 │ │ ├── order_region_a.csv # Sales data file for Region A
 │ │ ├── order_region_b.csv # Sales data file for Region B
@@ -23,6 +25,8 @@ project/
 │
 ├── README.md # Instructions for running the program
 └── requirements.txt # Python dependencies for the project
+
+---
 
 
 
