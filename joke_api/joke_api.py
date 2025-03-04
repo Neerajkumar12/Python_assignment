@@ -15,33 +15,45 @@ def fetch_and_store_jokes():
         
         for joke in jokes:
             if joke['type'] == 'single':
-                processed_jokes.append({
-                    'category': joke['category'],
-                    'type': joke['type'],
-                    'joke': joke.get('joke'),
-                    'setup': None,
-                    'delivery': None,
-                    'nsfw': joke['flags']['nsfw'],
-                    'political': joke['flags']['political'],
-                    'sexist': joke['flags']['sexist'],
-                    'safe': joke.get('safe'),
-                    'lang': joke.get('lang')
-                })
+                joke_text = joke.get('joke', '')
+                if not contains_sensitive_content(joke_text):
+                    processed_jokes.append({
+                        'category': joke['category'],
+                        'type': joke['type'],
+                        'joke': joke_text,
+                        'setup': None,
+                        'delivery': None,
+                        'nsfw': joke['flags']['nsfw'],
+                        'political': joke['flags']['political'],
+                        'safe': joke.get('safe'),
+                        'lang': joke.get('lang')
+                    })
             elif joke['type'] == 'twopart':
-                processed_jokes.append({
-                    'category': joke['category'],
-                    'type': joke['type'],
-                    'joke': None,
-                    'setup': joke.get('setup'),
-                    'delivery': joke.get('delivery'),
-                    'nsfw': joke['flags']['nsfw'],
-                    'political': joke['flags']['political'],
-                    'sexist': joke['flags']['sexist'],
-                    'safe': joke.get('safe'),
-                    'lang': joke.get('lang')
-                })
+                setup_text = joke.get('setup', '')
+                delivery_text = joke.get('delivery', '')
+                if not contains_sensitive_content(setup_text) and not contains_sensitive_content(delivery_text):
+                    processed_jokes.append({
+                        'category': joke['category'],
+                        'type': joke['type'],
+                        'joke': None,
+                        'setup': setup_text,
+                        'delivery': delivery_text,
+                        'nsfw': joke['flags']['nsfw'],
+                        'political': joke['flags']['political'],
+                        'safe': joke.get('safe'),
+                        'lang': joke.get('lang')
+                    })
                 
         store_jokes(processed_jokes)
+
+def contains_sensitive_content(text):
+    """Check if the text contains sensitive keywords."""
+    sensitive_keywords = ['sexist', 'sex', 'nsfw']
+    text = text.lower()
+    for keyword in sensitive_keywords:
+        if keyword in text:
+            return True
+    return False
 
 def store_jokes(jokes):
     conn = sqlite3.connect('jokes.db')
@@ -58,15 +70,14 @@ def store_jokes(jokes):
             delivery TEXT,
             nsfw BOOLEAN,
             political BOOLEAN,
-            sexist BOOLEAN,
             safe BOOLEAN,
             lang TEXT
         )
     ''')
     
     cursor.executemany('''
-        INSERT INTO jokes (category, type, joke, setup, delivery, nsfw, political, sexist, safe, lang)
-        VALUES (:category, :type, :joke, :setup, :delivery, :nsfw, :political, :sexist, :safe, :lang)
+        INSERT INTO jokes (category, type, joke, setup, delivery, nsfw, political, safe, lang)
+        VALUES (:category, :type, :joke, :setup, :delivery, :nsfw, :political, :safe, :lang)
         ''', jokes)
     
     conn.commit()
