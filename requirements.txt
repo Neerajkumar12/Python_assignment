@@ -1,0 +1,4 @@
+flask==2.3.2
+requests==2.31.0
+pandas==2.0.3
+sqlite3==3.36.0  # Built-in with Python but listed for clarity
